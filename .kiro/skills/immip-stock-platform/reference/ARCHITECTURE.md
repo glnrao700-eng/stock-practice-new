@@ -1,8 +1,8 @@
 # IMMIP: Full Architecture and Behaviour Reference
 
 Source: https://github.com/glnrao700-eng/stock-practice-new (commit `d43b83a`).
-The exact source is in `../template/`. This document explains what each file does so the
-app can be rebuilt, extended, or debugged without re-reading all ~700 KB of code.
+The exact source of every file is embedded in `../guide/*.md`. This document explains how the
+app works, so it can be rebuilt, extended or debugged without reading all ~700 KB of code.
 
 ## 1. Stack
 
@@ -26,8 +26,9 @@ Env (`.env.example`): `PORT`, `UPSTOX_ACCESS_TOKEN`, `GEMINI_API_KEY`.
 server.ts                      Express API + Vite middleware
 index.html                     Title/meta "Indian Market Multi-Agent Intelligence Platform (IMMIP)"
 metadata.json                  AI Studio metadata
-data/candles/<SYM>_1m_30d.json 30-day 1-minute candle DB (6 symbols, ~7,500 bars each)
-public/assets/aistudio/*.png   Screenshots (not referenced by code)
+data/candles/<SYM>_1m_30d.json 30-day 1-minute candle DB (6 symbols, 7,500 bars each = 20 days x 375)
+                               The skill generates these with scripts/generate-candles.mjs
+public/assets/aistudio/*.png   Screenshots in the original repo. No code references them; the skill omits them
 src/main.tsx                   createRoot(...).render(<App/>)
 src/index.css                  Tailwind import + .no-scrollbar utility
 src/App.tsx                    All global state, agent pipeline, simulation loop, layout
@@ -173,5 +174,8 @@ agent_weights: technical 0.40, pattern 0.30, sentiment 0.15, fundamental 0.15.
 - Historical date ranges are hard-coded to 2026-09-19 → 2026-10-19 in `server.ts`.
 - `@google/genai` and `GEMINI_API_KEY` are declared but unused.
 - Upstox token is stored in browser `localStorage`/`sessionStorage` and sent to the local proxy.
-- `public/assets/aistudio/*.png` are not referenced.
+- `public/assets/aistudio/*.png` are not referenced by any code.
+- The original candle files appear to have been collected from Upstox (their metadata matches the server's collect format). The skill's generator writes the same format and dates and
+  ends each stock on its reference close, but the intraday price path differs. Agent signals on any given step
+  can therefore differ from the original until real data is collected with `POST /api/candles/collect-30d`.
 - The repo explorer shows illustrative Python/FastAPI/Docker files that are not part of the running app.
